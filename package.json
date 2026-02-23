@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/zmirnes/error-logging-service.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "Mirnes Zahirović",
   "type": "commonjs",
   "main": "./dist/index.js",
