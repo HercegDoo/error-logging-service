@@ -1,7 +1,8 @@
 {
-  "name": "error-logging-service",
-  "version": "0.0.1",
-  "description": "\"# error-logging-service\"",
+  "name": "@dooherceg/error-logging-service",
+  "private": false,
+  "version": "1.0.0",
+  "description": "A lightweight, framework-agnostic JavaScript/TypeScript logging library.",
   "homepage": "https://github.com/zmirnes/error-logging-service#readme",
   "bugs": {
     "url": "https://github.com/zmirnes/error-logging-service/issues"
@@ -11,8 +12,7 @@
     "url": "git+https://github.com/zmirnes/error-logging-service.git"
   },
   "license": "MIT",
-  "author": "Mirnes Zahirović",
-  "type": "commonjs",
+  "author": "dooherceg",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
