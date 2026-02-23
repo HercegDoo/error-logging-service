@@ -8,15 +8,6 @@ import {v4 as uuidv4} from "uuid";
 
 export interface LoggerConfig {
     /**
-     * Minimum level to log.
-     * Everything below this level is silently discarded.
-     *
-     * Production typically: LogLevel.WARN
-     * Development typically: LogLevel.DEBUG
-     */
-    minLevel?: LogLevel;
-
-    /**
      * List of transports that receive log entries.
      * Injected from outside — Logger does not know what they are, only that they implement Transport.
      */
@@ -124,10 +115,6 @@ export class Logger {
         this.log(LogLevel.ERROR, message, { error, context });
     }
 
-    fatal(message: string, error?: Error, context?: Record<string, unknown>): void {
-        this.log(LogLevel.FATAL, message, { error, context });
-    }
-
     // ─── Plugin management ──────────────────────────────────────────────────────
 
     /**
@@ -165,8 +152,6 @@ export class Logger {
         message: string,
         extras: { error?: Error; context?: Record<string, unknown> } = {}
     ): Promise<void> {
-        if (level < this.config.minLevel) return;
-
         /**
          * Run the plugin pipeline — entry passes through each plugin in order.
          * If a plugin returns null, we stop the pipeline and send nothing.
@@ -217,7 +202,6 @@ export class Logger {
 
     private resolveConfig(config: LoggerConfig): ResolvedConfig {
         return {
-            minLevel: config.minLevel ?? LogLevel.DEBUG,
             transports: config.transports ?? [],
             plugins: config.plugins ?? [],
             generateId: config.generateId ?? uuidv4,

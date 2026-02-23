@@ -72,7 +72,6 @@ export class ConsoleTransport implements Transport {
 
     /**
      * Mapping levels to console methods.
-     * FATAL we treat as error — console doesn't have a fatal level.
      *
      * Bind is necessary — if you destructure console.error without bind,
      * 'this' context is lost and browser throws TypeError in strict mode.
@@ -85,7 +84,6 @@ export class ConsoleTransport implements Transport {
             [LogLevel.INFO]: console.info.bind(console),
             [LogLevel.WARN]: console.warn.bind(console),
             [LogLevel.ERROR]: console.error.bind(console),
-            [LogLevel.FATAL]: console.error.bind(console),
         };
 
         return methods[level];

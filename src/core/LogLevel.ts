@@ -11,7 +11,6 @@ export enum LogLevel {
     INFO = 1,
     WARN = 2,
     ERROR = 3,
-    FATAL = 4,
 }
 
 /**
@@ -23,5 +22,4 @@ export const LOG_LEVEL_LABELS: Record<LogLevel, string> = {
     [LogLevel.INFO]: "INFO",
     [LogLevel.WARN]: "WARN",
     [LogLevel.ERROR]: "ERROR",
-    [LogLevel.FATAL]: "FATAL",
 };
