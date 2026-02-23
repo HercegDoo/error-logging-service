@@ -31,7 +31,6 @@ import {Logger, LogLevel, ConsoleTransport} from 'error-logging-service'
 
 // Initialize once at app startup
 Logger.init({
-    minLevel: LogLevel.DEBUG,
     transports: [new ConsoleTransport()],
 })
 
@@ -48,20 +47,12 @@ logger.error('Payment failed', new Error('Card declined'), {orderId: 'ord-456'})
 
 ## Log Levels
 
-Levels are numeric — everything below `minLevel` is silently discarded.
-
 | Level   | Value | Use case                                |
 |---------|-------|-----------------------------------------|
 | `DEBUG` | 0     | Detailed information during development |
 | `INFO`  | 1     | General application events              |
 | `WARN`  | 2     | Something unexpected, but not breaking  |
 | `ERROR` | 3     | A failure that affects functionality    |
-
-```typescript
-Logger.init({
-    minLevel: LogLevel.WARN, // DEBUG and INFO are discarded
-})
-```
 
 ---
 
@@ -230,10 +221,9 @@ Logger.getInstance().addPlugin(myPlugin)
 
 ```tsx
 // main.tsx
-import {Logger, LogLevel, ConsoleTransport} from 'error-logging-service'
+import {Logger, ConsoleTransport} from 'error-logging-service'
 
 Logger.init({
-    minLevel: LogLevel.DEBUG,
     transports: [new ConsoleTransport()],
 })
 
@@ -305,12 +295,10 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 Initializes the logger. Must be called once before any other method.
 
-| Option       | Type           | Default          | Description                   |
-|--------------|----------------|------------------|-------------------------------|
-| `minLevel`   | `LogLevel`     | `LogLevel.DEBUG` | Minimum level to process      |
-| `transports` | `Transport[]`  | `[]`             | List of transports            |
-| `plugins`    | `Plugin[]`     | `[]`             | List of plugins               |
-| `generateId` | `() => string` | timestamp+random | Custom log entry ID generator |
+| Option       | Type          | Default | Description        |
+|--------------|---------------|---------|--------------------|
+| `transports` | `Transport[]` | `[]`    | List of transports |
+| `plugins`    | `Plugin[]`    | `[]`    | List of plugins    |
 
 ### `Logger.getInstance()`
 
