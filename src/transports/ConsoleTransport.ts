@@ -43,8 +43,6 @@ export class ConsoleTransport implements Transport {
         } catch (error) {
             throw new TransportError(
                 "ConsoleTransport failed to send entry",
-                this.name,
-                entry,
                 {cause: error}
             );
         }
