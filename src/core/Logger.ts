@@ -2,6 +2,7 @@ import {createLogEntry, LogEntry} from "./LogEntry";
 import {LogLevel} from "./LogLevel";
 import {Transport} from "../transports/Transport";
 import {Plugin} from "../plugins/Plugin";
+import {v4 as uuidv4} from "uuid";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -219,13 +220,7 @@ export class Logger {
             minLevel: config.minLevel ?? LogLevel.DEBUG,
             transports: config.transports ?? [],
             plugins: config.plugins ?? [],
-            generateId: config.generateId ?? defaultGenerateId,
+            generateId: config.generateId ?? uuidv4,
         };
     }
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function defaultGenerateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
