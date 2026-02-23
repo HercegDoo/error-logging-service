@@ -1,15 +1,8 @@
-import { LogEntry } from "../core/LogEntry";
-import { LogLevel, LOG_LEVEL_LABELS } from "../core/LogLevel";
-import { Transport, TransportError } from "./Transport";
+import {LogEntry} from "../core/LogEntry";
+import {LOG_LEVEL_LABELS, LogLevel} from "../core/LogLevel";
+import {Transport, TransportError} from "./Transport";
 
 export interface ConsoleTransportOptions {
-    /**
-     * Show the entire LogEntry object alongside the message?
-     * Development: true — you see all details
-     * Production: false — clean output
-     */
-    verbose?: boolean;
-
     /**
      * Custom formatter — user can fully control the appearance.
      * If not provided, we use the defaultFormatter below.
@@ -30,7 +23,6 @@ export class ConsoleTransport implements Transport {
 
     constructor(options: ConsoleTransportOptions = {}) {
         this.options = {
-            verbose: options.verbose ?? false,
             formatter: options.formatter,
         };
     }
@@ -47,18 +39,13 @@ export class ConsoleTransport implements Transport {
              * Everything through console.log would lose that information.
              */
             const consoleMethod = this.resolveConsoleMethod(entry.level);
-
-            if (this.options.verbose) {
-                consoleMethod(message, entry);
-            } else {
-                consoleMethod(message);
-            }
+            consoleMethod(message);
         } catch (error) {
             throw new TransportError(
                 "ConsoleTransport failed to send entry",
                 this.name,
                 entry,
-                { cause: error }
+                {cause: error}
             );
         }
     }

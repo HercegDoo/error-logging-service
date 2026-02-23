@@ -1,6 +1,7 @@
 # error-logging-service
 
-A lightweight, framework-agnostic JavaScript/TypeScript logging library built around clean architecture principles. Initialize once, use anywhere — with full control over how logs are transported and enriched.
+A lightweight, framework-agnostic JavaScript/TypeScript logging library built around clean architecture principles.
+Initialize once, use anywhere — with full control over how logs are transported and enriched.
 
 ---
 
@@ -26,22 +27,21 @@ npm install error-logging-service
 ## Quick Start
 
 ```typescript
-import { Logger, LogLevel, ConsoleTransport } from 'error-logging-service'
+import {Logger, LogLevel, ConsoleTransport} from 'error-logging-service'
 
 // Initialize once at app startup
 Logger.init({
     minLevel: LogLevel.DEBUG,
-    transports: [new ConsoleTransport({ verbose: true })],
+    transports: [new ConsoleTransport()],
 })
 
 // Use anywhere in your application
 const logger = Logger.getInstance()
 
 logger.debug('App started')
-logger.info('User logged in', { userId: '123' })
+logger.info('User logged in', {userId: '123'})
 logger.warn('Deprecated API called')
-logger.error('Payment failed', new Error('Card declined'), { orderId: 'ord-456' })
-logger.fatal('Database unreachable', new Error('Connection timeout'))
+logger.error('Payment failed', new Error('Card declined'), {orderId: 'ord-456'})
 ```
 
 ---
@@ -50,17 +50,16 @@ logger.fatal('Database unreachable', new Error('Connection timeout'))
 
 Levels are numeric — everything below `minLevel` is silently discarded.
 
-| Level   | Value | Use case                                      |
-|---------|-------|-----------------------------------------------|
-| `DEBUG` | 0     | Detailed information during development        |
-| `INFO`  | 1     | General application events                     |
-| `WARN`  | 2     | Something unexpected, but not breaking         |
-| `ERROR` | 3     | A failure that affects functionality           |
-| `FATAL` | 4     | A critical failure — application cannot continue |
+| Level   | Value | Use case                                |
+|---------|-------|-----------------------------------------|
+| `DEBUG` | 0     | Detailed information during development |
+| `INFO`  | 1     | General application events              |
+| `WARN`  | 2     | Something unexpected, but not breaking  |
+| `ERROR` | 3     | A failure that affects functionality    |
 
 ```typescript
 Logger.init({
-  minLevel: LogLevel.WARN, // DEBUG and INFO are discarded
+    minLevel: LogLevel.WARN, // DEBUG and INFO are discarded
 })
 ```
 
@@ -73,11 +72,10 @@ A transport defines **how** a log entry is sent. Implement the `Transport` inter
 ### Built-in: ConsoleTransport
 
 ```typescript
-import { ConsoleTransport } from 'error-logging-service'
+import {ConsoleTransport} from 'error-logging-service'
 
 new ConsoleTransport({
-  verbose: true,              // also prints the full LogEntry object
-  formatter: (entry) => `[${entry.level}] ${entry.message}` // custom format
+    formatter: (entry) => `[${entry.level}] ${entry.message}` // custom format
 })
 ```
 
@@ -86,32 +84,32 @@ new ConsoleTransport({
 Implement the `Transport` interface to send logs anywhere — your own API, Sentry, Datadog, or any other service.
 
 ```typescript
-import { Transport, LogEntry } from 'error-logging-service'
+import {Transport, LogEntry} from 'error-logging-service'
 
 class HttpTransport implements Transport {
-  readonly name = 'http'
+    readonly name = 'http'
 
-  async send(entry: LogEntry): Promise<void> {
-    await fetch('/api/logs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${your_token}`
-      },
-      body: JSON.stringify({
-        ...entry,
-        // Error objects are not JSON-serializable by default
-        // serialize them manually
-        error: entry.error
-          ? { message: entry.error.message, stack: entry.error.stack }
-          : undefined,
-      }),
-    })
-  }
+    async send(entry: LogEntry): Promise<void> {
+        await fetch('/api/logs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${your_token}`
+            },
+            body: JSON.stringify({
+                ...entry,
+                // Error objects are not JSON-serializable by default
+                // serialize them manually
+                error: entry.error
+                    ? {message: entry.error.message, stack: entry.error.stack}
+                    : undefined,
+            }),
+        })
+    }
 }
 
 Logger.init({
-  transports: [new HttpTransport()]
+    transports: [new HttpTransport()]
 })
 ```
 
@@ -121,10 +119,10 @@ All registered transports receive every log entry in parallel. If one fails, the
 
 ```typescript
 Logger.init({
-  transports: [
-    new ConsoleTransport(),
-    new HttpTransport(),
-  ]
+    transports: [
+        new ConsoleTransport(),
+        new HttpTransport(),
+    ]
 })
 ```
 
@@ -134,29 +132,30 @@ Logger.init({
 
 Plugins run before transports — they form a **pipeline** that processes each log entry in order.
 
-A plugin is a function that receives a `LogEntry` and returns a `LogEntry` or `null`. Returning `null` drops the entry — it will not be sent to any transport.
+A plugin is a function that receives a `LogEntry` and returns a `LogEntry` or `null`. Returning `null` drops the entry —
+it will not be sent to any transport.
 
 ### Enrichment — add data to every log
 
 ```typescript
-import { Plugin } from 'error-logging-service'
+import {Plugin} from 'error-logging-service'
 
 const withUserContext: Plugin = (entry) => ({
-  ...entry,
-  context: {
-    ...entry.context,
-    userId: getCurrentUser().id,
-    sessionId: getSessionId(),
-  }
+    ...entry,
+    context: {
+        ...entry.context,
+        userId: getCurrentUser().id,
+        sessionId: getSessionId(),
+    }
 })
 
 const withAppMeta: Plugin = (entry) => ({
-  ...entry,
-  context: {
-    ...entry.context,
-    appVersion: '2.4.1',
-    environment: process.env.NODE_ENV,
-  }
+    ...entry,
+    context: {
+        ...entry.context,
+        appVersion: '2.4.1',
+        environment: process.env.NODE_ENV,
+    }
 })
 ```
 
@@ -165,14 +164,14 @@ const withAppMeta: Plugin = (entry) => ({
 ```typescript
 // Drop all health check logs
 const filterHealthChecks: Plugin = (entry) => {
-  if (entry.message.includes('healthcheck')) return null
-  return entry
+    if (entry.message.includes('healthcheck')) return null
+    return entry
 }
 
 // Sample — only send 10% of DEBUG logs in production
 const sampleDebug: Plugin = (entry) => {
-  if (entry.level === LogLevel.DEBUG && Math.random() > 0.1) return null
-  return entry
+    if (entry.level === LogLevel.DEBUG && Math.random() > 0.1) return null
+    return entry
 }
 ```
 
@@ -180,8 +179,8 @@ const sampleDebug: Plugin = (entry) => {
 
 ```typescript
 const redactSensitiveData: Plugin = (entry) => ({
-  ...entry,
-  message: entry.message.replace(/password=\S+/gi, 'password=[REDACTED]')
+    ...entry,
+    message: entry.message.replace(/password=\S+/gi, 'password=[REDACTED]')
 })
 ```
 
@@ -189,16 +188,16 @@ const redactSensitiveData: Plugin = (entry) => ({
 
 ```typescript
 const serializeError: Plugin = (entry) => {
-  if (!entry.error) return entry
+    if (!entry.error) return entry
 
-  return {
-    ...entry,
-    error: {
-      message: entry.error.message,
-      name: entry.error.name,
-      stack: entry.error.stack,
-    } as unknown as Error
-  }
+    return {
+        ...entry,
+        error: {
+            message: entry.error.message,
+            name: entry.error.name,
+            stack: entry.error.stack,
+        } as unknown as Error
+    }
 }
 ```
 
@@ -206,14 +205,14 @@ const serializeError: Plugin = (entry) => {
 
 ```typescript
 Logger.init({
-  plugins: [
-    withUserContext,
-    withAppMeta,
-    filterHealthChecks,
-    redactSensitiveData,
-    serializeError,
-  ],
-  transports: [new HttpTransport()]
+    plugins: [
+        withUserContext,
+        withAppMeta,
+        filterHealthChecks,
+        redactSensitiveData,
+        serializeError,
+    ],
+    transports: [new HttpTransport()]
 })
 ```
 
@@ -231,37 +230,37 @@ Logger.getInstance().addPlugin(myPlugin)
 
 ```tsx
 // main.tsx
-import { Logger, LogLevel, ConsoleTransport } from 'error-logging-service'
+import {Logger, LogLevel, ConsoleTransport} from 'error-logging-service'
 
 Logger.init({
-  minLevel: LogLevel.DEBUG,
-  transports: [new ConsoleTransport()],
+    minLevel: LogLevel.DEBUG,
+    transports: [new ConsoleTransport()],
 })
 
-createRoot(document.getElementById('root')!).render(<App />)
+createRoot(document.getElementById('root')!).render(<App/>)
 ```
 
 ### useLogger hook
 
 ```tsx
 // hooks/useLogger.ts
-import { Logger } from 'error-logging-service'
+import {Logger} from 'error-logging-service'
 
 export function useLogger() {
-  return Logger.getInstance()
+    return Logger.getInstance()
 }
 
 // In any component
 function PaymentForm() {
-  const logger = useLogger()
+    const logger = useLogger()
 
-  const handleSubmit = async () => {
-    try {
-      await processPayment()
-    } catch (error) {
-      logger.error('Payment failed', error as Error, { component: 'PaymentForm' })
+    const handleSubmit = async () => {
+        try {
+            await processPayment()
+        } catch (error) {
+            logger.error('Payment failed', error as Error, {component: 'PaymentForm'})
+        }
     }
-  }
 }
 ```
 
@@ -270,24 +269,24 @@ function PaymentForm() {
 Since `ErrorBoundary` must be a class component, use `Logger.getInstance()` directly:
 
 ```tsx
-import { Logger } from 'error-logging-service'
-import { Component, ReactNode } from 'react'
+import {Logger} from 'error-logging-service'
+import {Component, ReactNode} from 'react'
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
     constructor(props: { children: ReactNode }) {
         super(props)
-        this.state = { hasError: false }
+        this.state = {hasError: false}
     }
 
     static getDerivedStateFromError() {
-        return { hasError: true }
+        return {hasError: true}
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         Logger.getInstance().error(
             'Uncaught error caught by ErrorBoundary',
             error,
-            { componentStack: errorInfo.componentStack }
+            {componentStack: errorInfo.componentStack}
         )
     }
 
@@ -306,12 +305,12 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 Initializes the logger. Must be called once before any other method.
 
-| Option       | Type         | Default          | Description                          |
-|--------------|--------------|------------------|--------------------------------------|
-| `minLevel`   | `LogLevel`   | `LogLevel.DEBUG` | Minimum level to process             |
-| `transports` | `Transport[]`| `[]`             | List of transports                   |
-| `plugins`    | `Plugin[]`   | `[]`             | List of plugins                      |
-| `generateId` | `() => string` | timestamp+random | Custom log entry ID generator      |
+| Option       | Type           | Default          | Description                   |
+|--------------|----------------|------------------|-------------------------------|
+| `minLevel`   | `LogLevel`     | `LogLevel.DEBUG` | Minimum level to process      |
+| `transports` | `Transport[]`  | `[]`             | List of transports            |
+| `plugins`    | `Plugin[]`     | `[]`             | List of plugins               |
+| `generateId` | `() => string` | timestamp+random | Custom log entry ID generator |
 
 ### `Logger.getInstance()`
 
@@ -321,14 +320,13 @@ Returns the existing logger instance. Throws if `init` has not been called.
 
 Resets the singleton. **For use in tests only.**
 
-### `logger.debug / info / warn / error / fatal`
+### `logger.debug / info / warn / error `
 
 ```
 logger.debug(message: string, context?: Record<string, unknown>): void
 logger.info(message: string, context?: Record<string, unknown>): void
 logger.warn(message: string, context?: Record<string, unknown>): void
 logger.error(message: string, error?: Error, context?: Record<string, unknown>): void
-logger.fatal(message: string, error?: Error, context?: Record<string, unknown>): void
 ```
 
 ### `logger.addTransport(transport)`
