@@ -185,6 +185,69 @@ describe("Logger", () => {
         });
     });
 
+    // ─── addTransport ───────────────────────────────────────────────────────────
+
+    describe("addTransport", () => {
+        it("should send to transport added after init", async () => {
+            Logger.init({});
+            const transport = createMockTransport();
+
+            Logger.getInstance().addTransport(transport);
+            Logger.getInstance().error("Test");
+
+            await vi.waitFor(() => expect(transport.entries).toHaveLength(1));
+        });
+
+        it("should throw if transport with same name already exists", () => {
+            Logger.init({transports: [createMockTransport("http")]});
+
+            expect(() =>
+                Logger.getInstance().addTransport(createMockTransport("http"))
+            ).toThrow('Transport with name "http" is already registered');
+        });
+    });
+
+    // ─── addPlugin ──────────────────────────────────────────────────────────────
+
+    describe("addPlugin", () => {
+        it("should run plugin added after init", async () => {
+            const transport = createMockTransport();
+            Logger.init({transports: [transport]});
+
+            const plugin: Plugin = (entry) => ({
+                ...entry,
+                context: {addedAfterInit: true},
+            });
+
+            Logger.getInstance().addPlugin(plugin);
+            Logger.getInstance().error("Test");
+
+            await vi.waitFor(() => {
+                expect(transport.entries[0]?.context).toEqual({addedAfterInit: true});
+            });
+        });
+
+        it("should run plugins added after init after existing plugins", async () => {
+            const transport = createMockTransport();
+            const order: number[] = [];
+
+            const first: Plugin = (entry) => {
+                order.push(1);
+                return entry;
+            };
+            const second: Plugin = (entry) => {
+                order.push(2);
+                return entry;
+            };
+
+            Logger.init({transports: [transport], plugins: [first]});
+            Logger.getInstance().addPlugin(second);
+            Logger.getInstance().error("Test");
+
+            await vi.waitFor(() => expect(order).toEqual([1, 2]));
+        });
+    });
+
     // ─── Log methods ────────────────────────────────────────────────────────────
 
     describe("log methods", () => {
