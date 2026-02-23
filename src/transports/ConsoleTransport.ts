@@ -15,36 +15,22 @@ export interface ConsoleTransportOptions {
 export class ConsoleTransport implements Transport {
     readonly name = "console";
 
-    private readonly options: Required<
-        Omit<ConsoleTransportOptions, "formatter">
-    > & {
-        formatter?: ConsoleTransportOptions["formatter"];
-    };
+    private readonly formatter?: (entry: LogEntry) => string;
 
     constructor(options: ConsoleTransportOptions = {}) {
-        this.options = {
-            formatter: options.formatter,
-        };
+        this.formatter = options.formatter;
     }
 
     async send(entry: LogEntry): Promise<void> {
         try {
-            const message = this.options.formatter
-                ? this.options.formatter(entry)
+            const message = this.formatter
+                ? this.formatter(entry)
                 : this.defaultFormatter(entry);
 
-            /**
-             * We use the appropriate console method per level —
-             * browser DevTools can then filter by type (Errors, Warnings...).
-             * Everything through console.log would lose that information.
-             */
             const consoleMethod = this.resolveConsoleMethod(entry.level);
             consoleMethod(message);
         } catch (error) {
-            throw new TransportError(
-                "ConsoleTransport failed to send entry",
-                {cause: error}
-            );
+            throw new TransportError("ConsoleTransport failed to send entry", {cause: error});
         }
     }
 
