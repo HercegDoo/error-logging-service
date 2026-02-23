@@ -1,4 +1,4 @@
-import { LogLevel } from "./LogLevel";
+import {LogLevel} from "./LogLevel";
 
 /**
  * LogEntry is an IMMUTABLE data transfer object.
@@ -10,7 +10,6 @@ import { LogLevel } from "./LogLevel";
  * This prevents side-effects between plugins that share the same entry.
  */
 export interface LogEntry {
-    readonly id: string;
     readonly level: LogLevel;
     readonly message: string;
     readonly timestamp: Date;
@@ -45,20 +44,10 @@ export function createLogEntry(
     }
 ): LogEntry {
     return {
-        id: generateId(),
         timestamp: new Date(),
         level: params.level,
         message: params.message,
         error: params.error,
         context: params.context,
     };
-}
-
-/**
- * Intentionally simple — we don't need a UUID library for now.
- * If performance becomes a problem or we need collision-resistance, we'll replace it.
- * This is a conscious decision, not laziness.
- */
-function generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }

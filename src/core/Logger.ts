@@ -2,7 +2,6 @@ import {createLogEntry, LogEntry} from "./LogEntry";
 import {LogLevel} from "./LogLevel";
 import {Transport} from "../transports/Transport";
 import {Plugin} from "../plugins/Plugin";
-import {v4 as uuidv4} from "uuid";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,12 +17,6 @@ export interface LoggerConfig {
      * Executed in order — output of one is input of the next.
      */
     plugins?: Plugin[];
-
-    /**
-     * Custom ID generator — DI principle discussed in Segment 1.
-     * Default: timestamp + random string
-     */
-    generateId?: () => string;
 }
 
 // Internal — after init all values must be defined
@@ -100,19 +93,19 @@ export class Logger {
     // ─── Public logging API ─────────────────────────────────────────────────────
 
     debug(message: string, context?: Record<string, unknown>): void {
-        this.log(LogLevel.DEBUG, message, { context });
+        this.log(LogLevel.DEBUG, message, {context});
     }
 
     info(message: string, context?: Record<string, unknown>): void {
-        this.log(LogLevel.INFO, message, { context });
+        this.log(LogLevel.INFO, message, {context});
     }
 
     warn(message: string, context?: Record<string, unknown>): void {
-        this.log(LogLevel.WARN, message, { context });
+        this.log(LogLevel.WARN, message, {context});
     }
 
     error(message: string, error?: Error, context?: Record<string, unknown>): void {
-        this.log(LogLevel.ERROR, message, { error, context });
+        this.log(LogLevel.ERROR, message, {error, context});
     }
 
     // ─── Plugin management ──────────────────────────────────────────────────────
@@ -204,7 +197,6 @@ export class Logger {
         return {
             transports: config.transports ?? [],
             plugins: config.plugins ?? [],
-            generateId: config.generateId ?? uuidv4,
         };
     }
 }
